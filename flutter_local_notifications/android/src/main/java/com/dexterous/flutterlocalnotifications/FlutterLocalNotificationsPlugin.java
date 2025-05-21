@@ -260,7 +260,7 @@ public class FlutterLocalNotificationsPlugin
   }
 
   protected static Notification createNotification(
-      Context context, NotificationDetails notificationDetails, MethodCall call) {
+      Context context, NotificationDetails notificationDetails) {
     NotificationChannelDetails notificationChannelDetails =
         NotificationChannelDetails.fromNotificationDetails(notificationDetails);
     if (canCreateNotificationChannel(context, notificationChannelDetails)) {
@@ -425,7 +425,7 @@ public class FlutterLocalNotificationsPlugin
     }
 
     Log.d("FLN_DEBUG", "Init custom RemoteViews layout");
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && notificationDetails.usesChronometer && call.argument("useCustomTimerLayout")) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && notificationDetails.usesChronometer) {
       Log.d("FLN_DEBUG", "Using custom RemoteViews layout");
       Boolean isPnWithActions = notificationDetails.actions != null && !notificationDetails.actions.isEmpty();
 //      Boolean isPnWithActions = false;
@@ -1351,8 +1351,8 @@ public class FlutterLocalNotificationsPlugin
     return true;
   }
 
-  static void showNotification(Context context, NotificationDetails notificationDetails, MethodCall call) {
-    Notification notification = createNotification(context, notificationDetails, call);
+  static void showNotification(Context context, NotificationDetails notificationDetails) {
+    Notification notification = createNotification(context, notificationDetails);
     NotificationManagerCompat notificationManagerCompat = getNotificationManager(context);
 
     if (notificationDetails.tag != null) {
@@ -1728,7 +1728,7 @@ public class FlutterLocalNotificationsPlugin
     Map<String, Object> arguments = call.arguments();
     NotificationDetails notificationDetails = extractNotificationDetails(result, arguments);
     if (notificationDetails != null) {
-      showNotification(applicationContext, notificationDetails, call);
+      showNotification(applicationContext, notificationDetails);
       result.success(null);
     }
   }
