@@ -35,6 +35,7 @@ import android.text.Spanned;
 import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
+import android.widget.RemoteViews;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
@@ -221,16 +222,6 @@ public class FlutterLocalNotificationsPlugin
 
   private PermissionRequestProgress permissionRequestProgress = PermissionRequestProgress.None;
 
-  public static int getViewIdOfActions(int i) {
-    if (i == 1) {
-      return R.id.action_button1;
-    }
-    if (i == 2) {
-      return R.id.action_button2;
-    }
-    return R.id.action_button1;
-  }
-
   static void rescheduleNotifications(Context context) {
     ArrayList<NotificationDetails> scheduledNotifications = loadScheduledNotifications(context);
     for (NotificationDetails notificationDetails : scheduledNotifications) {
@@ -269,7 +260,7 @@ public class FlutterLocalNotificationsPlugin
   }
 
   protected static Notification createNotification(
-      Context context, NotificationDetails notificationDetails) {
+      Context context, NotificationDetails notificationDetails, MethodCall call) {
     NotificationChannelDetails notificationChannelDetails =
         NotificationChannelDetails.fromNotificationDetails(notificationDetails);
     if (canCreateNotificationChannel(context, notificationChannelDetails)) {
@@ -436,11 +427,12 @@ public class FlutterLocalNotificationsPlugin
     Log.d("FLN_DEBUG", "Init custom RemoteViews layout");
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && notificationDetails.usesChronometer && call.argument("useCustomTimerLayout")) {
       Log.d("FLN_DEBUG", "Using custom RemoteViews layout");
-      Boolean isPnWithActions = notificationDetails.getActions() != null && !notificationDetails.getActions().isEmpty();
+      Boolean isPnWithActions = notificationDetails.actions != null && !notificationDetails.actions.isEmpty();
+//      Boolean isPnWithActions = false;
       Log.d("FLN_DEBUG", "isPnWithActions : " + isPnWithActions);
       RemoteViews notificationView = new RemoteViews(context.getPackageName(), isPnWithActions ? R.layout.custom_timer_view_with_actions : R.layout.custom_timer_view);
       if (!isPnWithActions) {
-        String iconName = notificationDetails.getIcon();
+        String iconName = notificationDetails.icon;
         Log.d("FLN_DEBUG", "iconName : " + iconName);
         if (iconName != null) {
           int iconResId = context.getResources().getIdentifier(iconName, "drawable", context.getPackageName());
@@ -461,20 +453,20 @@ public class FlutterLocalNotificationsPlugin
       if(!isPnWithActions) {
         notificationView.setTextViewText(R.id.appName, appName);
       }
-      notificationView.setTextViewText(R.id.title, notificationDetails.getTitle());
+      notificationView.setTextViewText(R.id.title, notificationDetails.title);
       if(!isPnWithActions) {
-        notificationView.setTextViewText(R.id.body, notificationDetails.getBody());
-        notificationView.setTextViewText(R.id.subTitle, notificationDetails.getSubText() != null ? notificationDetails.getSubText() : "");
+        notificationView.setTextViewText(R.id.body, notificationDetails.body);
+        notificationView.setTextViewText(R.id.subTitle, notificationDetails.subText != null ? notificationDetails.subText : "");
       }
-      notificationView.setChronometerCountDown(R.id.timer, notificationDetails.getChronometerCountDown());
-      notificationView.setChronometer(R.id.timer, SystemClock.elapsedRealtime() + (notificationDetails.getWhen() - System.currentTimeMillis()), null, true);
-      // notificationView.setChronometer(R.id.timer, notificationDetails.getTimestamp(), null, true);
+      notificationView.setChronometerCountDown(R.id.timer, notificationDetails.chronometerCountDown);
+      notificationView.setChronometer(R.id.timer, SystemClock.elapsedRealtime() + (notificationDetails.when - System.currentTimeMillis()), null, true);
+      // notificationView.setChronometer(R.id.timer, notificationDetails.timestamp, null, true);
       builder.setCustomContentView(notificationView);
       builder.setStyle(new NotificationCompat.DecoratedCustomViewStyle());
 
       RemoteViews bigNotificationView = new RemoteViews(context.getPackageName(), isPnWithActions ? R.layout.big_custom_timer_with_actions : R.layout.big_custom_timer_view);
       if (!isPnWithActions) {
-        String iconName = notificationDetails.getIcon();
+        String iconName = notificationDetails.icon;
         if (iconName != null) {
           int iconResId = context.getResources().getIdentifier(iconName, "drawable", context.getPackageName());
           if (iconResId != 0) {
@@ -483,13 +475,13 @@ public class FlutterLocalNotificationsPlugin
         }
       }
       bigNotificationView.setTextViewText(R.id.appName, appName);
-      bigNotificationView.setTextViewText(R.id.title, notificationDetails.getTitle());
+      bigNotificationView.setTextViewText(R.id.title, notificationDetails.title);
       if(!isPnWithActions) {
-        bigNotificationView.setTextViewText(R.id.body, notificationDetails.getBody());
-        bigNotificationView.setTextViewText(R.id.subTitle, notificationDetails.getSubText() != null ? notificationDetails.getSubText() : "");
+        bigNotificationView.setTextViewText(R.id.body, notificationDetails.body);
+        bigNotificationView.setTextViewText(R.id.subTitle, notificationDetails.subText != null ? notificationDetails.subText : "");
       }
-      bigNotificationView.setChronometerCountDown(R.id.timer, notificationDetails.getChronometerCountDown());
-      bigNotificationView.setChronometer(R.id.timer, SystemClock.elapsedRealtime() + (notificationDetails.getWhen() - System.currentTimeMillis()), null, true);
+      bigNotificationView.setChronometerCountDown(R.id.timer, notificationDetails.chronometerCountDown);
+      bigNotificationView.setChronometer(R.id.timer, SystemClock.elapsedRealtime() + (notificationDetails.when() - System.currentTimeMillis()), null, true);
       Log.d("FLN_DEBUG", "builder set : ");
       builder.setCustomBigContentView(bigNotificationView);
       builder.setCustomHeadsUpContentView(notificationView);
@@ -1359,8 +1351,8 @@ public class FlutterLocalNotificationsPlugin
     return true;
   }
 
-  static void showNotification(Context context, NotificationDetails notificationDetails) {
-    Notification notification = createNotification(context, notificationDetails);
+  static void showNotification(Context context, NotificationDetails notificationDetails, MethodCall call) {
+    Notification notification = createNotification(context, notificationDetails, call);
     NotificationManagerCompat notificationManagerCompat = getNotificationManager(context);
 
     if (notificationDetails.tag != null) {
@@ -1736,7 +1728,7 @@ public class FlutterLocalNotificationsPlugin
     Map<String, Object> arguments = call.arguments();
     NotificationDetails notificationDetails = extractNotificationDetails(result, arguments);
     if (notificationDetails != null) {
-      showNotification(applicationContext, notificationDetails);
+      showNotification(applicationContext, notificationDetails, call);
       result.success(null);
     }
   }
