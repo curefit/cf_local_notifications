@@ -433,13 +433,18 @@ public class FlutterLocalNotificationsPlugin
       builder.setNumber(notificationDetails.number);
     }
 
+    Log.d("FLN_DEBUG", "Init custom RemoteViews layout");
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && notificationDetails.usesChronometer && call.argument("useCustomTimerLayout")) {
+      Log.d("FLN_DEBUG", "Using custom RemoteViews layout");
       Boolean isPnWithActions = notificationDetails.getActions() != null && !notificationDetails.getActions().isEmpty();
+      Log.d("FLN_DEBUG", "isPnWithActions : " + isPnWithActions);
       RemoteViews notificationView = new RemoteViews(context.getPackageName(), isPnWithActions ? R.layout.custom_timer_view_with_actions : R.layout.custom_timer_view);
       if (!isPnWithActions) {
         String iconName = notificationDetails.getIcon();
+        Log.d("FLN_DEBUG", "iconName : " + iconName);
         if (iconName != null) {
           int iconResId = context.getResources().getIdentifier(iconName, "drawable", context.getPackageName());
+          Log.d("FLN_DEBUG", "iconResId : " + iconResId);
           if (iconResId != 0) {
             notificationView.setImageViewResource(R.id.small_icon, iconResId);
           }
@@ -449,6 +454,7 @@ public class FlutterLocalNotificationsPlugin
       String appName;
       try {
         appName = context.getApplicationInfo().loadLabel(context.getPackageManager()).toString();
+        Log.d("FLN_DEBUG", "appName : " + appName);
       } catch (Exception e) {
         appName = "cult.fit";
       }
@@ -483,10 +489,11 @@ public class FlutterLocalNotificationsPlugin
       }
       bigNotificationView.setChronometerCountDown(R.id.timer, notificationDetails.getChronometerCountDown());
       bigNotificationView.setChronometer(R.id.timer, SystemClock.elapsedRealtime() + (notificationDetails.getWhen() - System.currentTimeMillis()), null, true);
+      Log.d("FLN_DEBUG", "builder set : ");
       builder.setCustomBigContentView(bigNotificationView);
       builder.setCustomHeadsUpContentView(notificationView);
-      builder.setUsesChronometer(false);
-      builder.setShowWhen(false);
+      builder.setUsesChronometer(true);
+      builder.setShowWhen(true);
       if(isPnWithActions) {
         builder.setAutoCancel(false);
       }
