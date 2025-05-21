@@ -36,6 +36,7 @@ import android.text.TextUtils;
 import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.widget.RemoteViews;
+import android.os.SystemClock;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
@@ -481,7 +482,7 @@ public class FlutterLocalNotificationsPlugin
         bigNotificationView.setTextViewText(R.id.subTitle, notificationDetails.subText != null ? notificationDetails.subText : "");
       }
       bigNotificationView.setChronometerCountDown(R.id.timer, notificationDetails.chronometerCountDown);
-      bigNotificationView.setChronometer(R.id.timer, SystemClock.elapsedRealtime() + (notificationDetails.when() - System.currentTimeMillis()), null, true);
+      bigNotificationView.setChronometer(R.id.timer, SystemClock.elapsedRealtime() + (notificationDetails.when - System.currentTimeMillis()), null, true);
       Log.d("FLN_DEBUG", "builder set : ");
       builder.setCustomBigContentView(bigNotificationView);
       builder.setCustomHeadsUpContentView(notificationView);
