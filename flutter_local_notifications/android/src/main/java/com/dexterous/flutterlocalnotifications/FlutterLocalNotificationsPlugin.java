@@ -470,6 +470,7 @@ public class FlutterLocalNotificationsPlugin
       notificationView.setChronometer(R.id.timer, SystemClock.elapsedRealtime() + (notificationDetails.getWhen() - System.currentTimeMillis()), null, true);
       // notificationView.setChronometer(R.id.timer, notificationDetails.getTimestamp(), null, true);
       builder.setCustomContentView(notificationView);
+      builder.setStyle(new NotificationCompat.DecoratedCustomViewStyle());
 
       RemoteViews bigNotificationView = new RemoteViews(context.getPackageName(), isPnWithActions ? R.layout.big_custom_timer_with_actions : R.layout.big_custom_timer_view);
       if (!isPnWithActions) {
