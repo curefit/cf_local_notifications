@@ -64,37 +64,73 @@
 
     </RelativeLayout>
     <LinearLayout
-        android:paddingTop="5dp"
+        android:id="@+id/custom_actions"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_toLeftOf="@id/timer"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:gravity="end"
+        android:padding="8dp">
 
         <Button
-            android:backgroundTint="@color/action_button_bg"
-            android:layout_marginRight="5dp"
-            android:id="@+id/action_button1"
-            android:layout_width="0dp"
-            android:layout_height="40dp"
-            android:layout_weight="1"
-            android:layout_gravity="start"
-            android:fontFamily="sans-serif-black"
-            android:textColor="@color/image_colour"
-            tools:text="Action 1 BB" />
+            android:id="@+id/btn_reply"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Reply"
+            android:background="?android:selectableItemBackground"
+            android:textColor="@android:color/white"
+            android:padding="8dp" />
 
         <Button
-            android:backgroundTint="@color/action_button_primary_bg"
-            android:layout_marginLeft="5dp"
-            android:id="@+id/action_button2"
-            android:layout_width="0dp"
-            android:layout_height="40dp"
-            android:layout_weight="1"
-            android:layout_gravity="end"
-            android:fontFamily="sans-serif-black"
-            android:textColor="@color/action_text_primary"
-            tools:text="Action 2 BB"
-            />
+            android:id="@+id/btn_mark_read"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Mark Read"
+            android:background="?android:selectableItemBackground"
+            android:textColor="@android:color/white"
+            android:padding="8dp" />
     </LinearLayout>
+<!--    <LinearLayout-->
+<!--        android:id="@+id/actions_container"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:orientation="horizontal"-->
+<!--        android:gravity="end"-->
+<!--        android:paddingTop="10dp"-->
+<!--        android:layout_marginTop="8dp"-->
+<!--        android:layout_marginBottom="8dp">-->
+
+<!--        &lt;!&ndash; Action placeholders &ndash;&gt;-->
+<!--        <FrameLayout-->
+<!--            android:id="@+id/action_container_1"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"/>-->
+
+
+<!--        <View-->
+<!--            android:layout_width="1dp"-->
+<!--            android:layout_height="24dp"-->
+<!--            android:background="#CCCCCC"-->
+<!--            android:visibility="gone"-->
+<!--            android:id="@+id/separator_1" />-->
+
+<!--        <FrameLayout-->
+<!--            android:id="@+id/action_container_2"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"/>-->
+
+
+<!--        <View-->
+<!--            android:layout_width="1dp"-->
+<!--            android:layout_height="24dp"-->
+<!--            android:background="#CCCCCC"-->
+<!--            android:visibility="gone"-->
+<!--            android:id="@+id/separator_2" />-->
+
+<!--        <FrameLayout-->
+<!--            android:id="@+id/action_container_3"-->
+<!--            android:layout_width="wrap_content"-->
+<!--            android:layout_height="wrap_content"/>-->
+
+
+<!--    </LinearLayout>-->
 </LinearLayout>

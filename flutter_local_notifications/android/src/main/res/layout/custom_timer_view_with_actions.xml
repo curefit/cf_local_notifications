@@ -64,38 +64,4 @@
 
 
     </RelativeLayout>
-    <LinearLayout
-        android:paddingTop="5dp"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentStart="true"
-        android:layout_toLeftOf="@id/timer"
-        android:orientation="horizontal">
-
-        <Button
-            android:backgroundTint="@color/action_button_bg"
-            android:layout_marginRight="5dp"
-            android:id="@+id/action_button1"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_gravity="start"
-            android:fontFamily="sans-serif-black"
-            android:textColor="@color/image_colour"
-            tools:text="Action 1 SS" />
-
-        <Button
-            android:backgroundTint="@color/action_button_primary_bg"
-            android:layout_marginLeft="5dp"
-            android:id="@+id/action_button2"
-            android:layout_width="0dp"
-            android:layout_height="match_parent"
-            android:layout_weight="1"
-            android:layout_gravity="end"
-            android:fontFamily="sans-serif-black"
-            android:textColor="@color/action_text_primary"
-            tools:text="Action 2 SS"
-            />
-    </LinearLayout>
 </LinearLayout>

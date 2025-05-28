@@ -37,6 +37,13 @@ import android.text.style.ForegroundColorSpan;
 import android.util.Log;
 import android.widget.RemoteViews;
 import android.os.SystemClock;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.Rect;
+import android.graphics.RectF;
+import android.graphics.PorterDuff;
+import android.view.View;
+import android.graphics.PorterDuffXfermode;
 
 import androidx.annotation.Keep;
 import androidx.annotation.NonNull;
@@ -429,65 +436,102 @@ public class FlutterLocalNotificationsPlugin
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N && notificationDetails.usesChronometer) {
       Log.d("FLN_DEBUG", "Using custom RemoteViews layout");
       Boolean isPnWithActions = notificationDetails.actions != null && !notificationDetails.actions.isEmpty();
-//      Boolean isPnWithActions = false;
       Log.d("FLN_DEBUG", "isPnWithActions : " + isPnWithActions);
       RemoteViews notificationView = new RemoteViews(context.getPackageName(), isPnWithActions ? R.layout.custom_timer_view_with_actions : R.layout.custom_timer_view);
-      if (!isPnWithActions) {
-        String iconName = notificationDetails.icon;
-        Log.d("FLN_DEBUG", "iconName : " + iconName);
-        if (iconName != null) {
-          int iconResId = context.getResources().getIdentifier(iconName, "drawable", context.getPackageName());
-          Log.d("FLN_DEBUG", "iconResId : " + iconResId);
-          if (iconResId != 0) {
-            notificationView.setImageViewResource(R.id.small_icon, iconResId);
-          }
-        }
-      }
 
-      String appName;
-      try {
-        appName = context.getApplicationInfo().loadLabel(context.getPackageManager()).toString();
-        Log.d("FLN_DEBUG", "appName : " + appName);
-      } catch (Exception e) {
-        appName = "cult.fit";
-      }
-      if(!isPnWithActions) {
-        notificationView.setTextViewText(R.id.appName, appName);
-      }
+      Log.d("FLN_DEBUG", "body : " + notificationDetails.body);
+      Log.d("FLN_DEBUG", "subText : " + notificationDetails.subText);
+      Log.d("FLN_DEBUG", "title : " + notificationDetails.title);
       notificationView.setTextViewText(R.id.title, notificationDetails.title);
       if(!isPnWithActions) {
         notificationView.setTextViewText(R.id.body, notificationDetails.body);
-        notificationView.setTextViewText(R.id.subTitle, notificationDetails.subText != null ? notificationDetails.subText : "");
       }
       notificationView.setChronometerCountDown(R.id.timer, notificationDetails.chronometerCountDown);
       notificationView.setChronometer(R.id.timer, SystemClock.elapsedRealtime() + (notificationDetails.when - System.currentTimeMillis()), null, true);
-      // notificationView.setChronometer(R.id.timer, notificationDetails.timestamp, null, true);
-      builder.setCustomContentView(notificationView);
-      builder.setStyle(new NotificationCompat.DecoratedCustomViewStyle());
 
       RemoteViews bigNotificationView = new RemoteViews(context.getPackageName(), isPnWithActions ? R.layout.big_custom_timer_with_actions : R.layout.big_custom_timer_view);
-      if (!isPnWithActions) {
-        String iconName = notificationDetails.icon;
-        if (iconName != null) {
-          int iconResId = context.getResources().getIdentifier(iconName, "drawable", context.getPackageName());
-          if (iconResId != 0) {
-            bigNotificationView.setImageViewResource(R.id.small_icon, iconResId);
+      bigNotificationView.setTextViewText(R.id.title, notificationDetails.title);
+      bigNotificationView.setTextViewText(R.id.body, notificationDetails.body);
+      bigNotificationView.setChronometerCountDown(R.id.timer, notificationDetails.chronometerCountDown);
+      bigNotificationView.setChronometer(R.id.timer, SystemClock.elapsedRealtime() + (notificationDetails.when - System.currentTimeMillis()), null, true);
+
+      if (notificationDetails.style == NotificationStyle.BigPicture) {
+        StyleInformation styleInformation = notificationDetails.styleInformation;
+
+        if (styleInformation instanceof BigPictureStyleInformation) {
+          BigPictureStyleInformation bigPictureStyleInformation = (BigPictureStyleInformation) styleInformation;
+
+          if (bigPictureStyleInformation.bigPicture != null && bigPictureStyleInformation.bigPictureBitmapSource != null) {
+            Bitmap originalBitmap = getBitmapFromSource(
+                    context,
+                    bigPictureStyleInformation.bigPicture,
+                    bigPictureStyleInformation.bigPictureBitmapSource
+            );
+
+            if (originalBitmap != null) {
+              Bitmap roundedBitmap = getRoundedCornerBitmap(originalBitmap, 20f);
+              Log.d("FLN_DEBUG", "Rounded bitmap size: " + roundedBitmap.getWidth() + "x" + roundedBitmap.getHeight());
+              bigNotificationView.setImageViewBitmap(R.id.big_picture, roundedBitmap);
+              bigNotificationView.setViewVisibility(R.id.big_picture, View.VISIBLE);
+            } else {
+              bigNotificationView.setViewVisibility(R.id.big_picture, View.GONE);
+              bigNotificationView.setViewPadding(R.id.big_picture, 0, 0, 0, 0);
+            }
           }
         }
       }
-      bigNotificationView.setTextViewText(R.id.appName, appName);
-      bigNotificationView.setTextViewText(R.id.title, notificationDetails.title);
-      if(!isPnWithActions) {
-        bigNotificationView.setTextViewText(R.id.body, notificationDetails.body);
-        bigNotificationView.setTextViewText(R.id.subTitle, notificationDetails.subText != null ? notificationDetails.subText : "");
-      }
-      bigNotificationView.setChronometerCountDown(R.id.timer, notificationDetails.chronometerCountDown);
-      bigNotificationView.setChronometer(R.id.timer, SystemClock.elapsedRealtime() + (notificationDetails.when - System.currentTimeMillis()), null, true);
-      Log.d("FLN_DEBUG", "builder set : ");
+
+//      if (notificationDetails.actions != null) {
+//        bigNotificationView.setOnClickPendingIntent(R.id.btn_reply, "Reply", replyPendingIntent);
+//        bigNotificationView.setOnClickPendingIntent(R.id.btn_mark_read, "Mark as Read", markReadPendingIntent);
+//      }
+
+//      if (notificationDetails.actions != null) {
+//        Log.d("FLN_DEBUG", "Using custom actions size : " + notificationDetails.actions.size());
+//        List<NotificationAction> actions = notificationDetails.actions;
+//
+//        int count = Math.min(actions.size(), 3);
+//
+//        for (int i = 0; i < count; i++) {
+//          NotificationAction action = actions.get(i);
+//          int containerId = context.getResources().getIdentifier("action_container_" + (i + 1), "id", context.getPackageName());
+//          int separatorId = context.getResources().getIdentifier("separator_" + i, "id", context.getPackageName());
+//          Log.d("FLN_DEBUG", "Using custom actions size : " + notificationDetails.actions.size());
+//
+//          RemoteViews button = new RemoteViews(context.getPackageName(), R.layout.notification_action_button);
+//          button.setTextViewText(R.id.action_text, action.title);
+//
+//          Intent newIntent = new Intent(context, ActionBroadcastReceiver.class);
+//          newIntent.setAction(ActionBroadcastReceiver.ACTION_TAPPED);
+//          newIntent.putExtra(NOTIFICATION_ID, notificationDetails.id);
+//          newIntent.putExtra(ACTION_ID, action.id);
+//          Log.d("FLN_DEBUG", "Using custom NOTIFICATION_ID : " + notificationDetails.id);
+//          Log.d("FLN_DEBUG", "Using custom ACTION_ID : " + action.id);
+//
+//          PendingIntent pi = PendingIntent.getBroadcast(
+//                  context, notificationDetails.id + i, newIntent, PendingIntent.FLAG_UPDATE_CURRENT | PendingIntent.FLAG_IMMUTABLE);
+//
+//          Log.d("FLN_DEBUG", "Using custom action_text : " + R.id.action_text);
+//          button.setOnClickPendingIntent(R.id.action_text, pi);
+//          Log.d("FLN_DEBUG", "Using custom actions size : " + notificationDetails.actions.size());
+//
+//          // This will now work, since you're using a valid container view
+////          bigNotificationView.removeAllViews(containerId);
+//          bigNotificationView.addView(containerId, button);
+//          Log.d("FLN_DEBUG", "Using custom actions size : " + notificationDetails.actions.size());
+//
+//          if (i > 0) {
+//            bigNotificationView.setViewVisibility(separatorId, View.VISIBLE);
+//            Log.d("FLN_DEBUG", "Using custom actions : " + notificationDetails.actions.size());
+//          }
+//        }
+//      }
+
       builder.setCustomBigContentView(bigNotificationView);
       builder.setCustomHeadsUpContentView(notificationView);
-      builder.setUsesChronometer(true);
-      builder.setShowWhen(true);
+      builder.setCustomContentView(notificationView);
+      builder.setUsesChronometer(false);
+      builder.setShowWhen(false);
       if(isPnWithActions) {
         builder.setAutoCancel(false);
       }
@@ -510,6 +554,24 @@ public class FlutterLocalNotificationsPlugin
       }
     }
     return notification;
+  }
+
+  private static Bitmap getRoundedCornerBitmap(Bitmap bitmap, float cornerRadius) {
+    Bitmap output = Bitmap.createBitmap(bitmap.getWidth(), bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+    Canvas canvas = new Canvas(output);
+
+    final Paint paint = new Paint();
+    final Rect rect = new Rect(0, 0, bitmap.getWidth(), bitmap.getHeight());
+    final RectF rectF = new RectF(rect);
+
+    paint.setAntiAlias(true);
+    canvas.drawRoundRect(rectF, cornerRadius, cornerRadius, paint);
+
+    // Use SRC_IN to keep only the rounded shape
+    paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+    canvas.drawBitmap(bitmap, rect, rect, paint);
+
+    return output;
   }
 
   private static Boolean canCreateNotificationChannel(
